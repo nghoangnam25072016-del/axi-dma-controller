@@ -1,0 +1,130 @@
+`timescale 1ns/1ps
+
+module dma_tb;
+    logic clk;
+    logic rst_n;
+    logic start;
+    logic [7:0] length;
+    logic busy;
+    logic dma_done;
+
+    logic [31:0] araddr;
+    logic        arvalid;
+    logic        arready;
+
+    logic [31:0] rdata;
+    logic        rvalid;
+    logic        rready;
+
+    logic [31:0] awaddr;
+    logic        awvalid;
+    logic        awready;
+
+    logic [31:0] wdata;
+    logic        wvalid;
+    logic        wready;
+
+    logic        bvalid;
+    logic        bready;
+
+    dma_top dut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(start),
+        .length(length),
+        .busy(busy),
+        .dma_done(dma_done),
+        .araddr(araddr),
+        .arvalid(arvalid),
+        .arready(arready),
+        .rdata(rdata),
+        .rvalid(rvalid),
+        .rready(rready),
+        .awaddr(awaddr),
+        .awvalid(awvalid),
+        .awready(awready),
+        .wdata(wdata),
+        .wvalid(wvalid),
+        .wready(wready),
+        .bvalid(bvalid),
+        .bready(bready)
+    );
+
+    always #5 clk = ~clk;
+
+    task automatic random_delay();
+        repeat ($urandom_range(1, 5)) @(posedge clk);
+    endtask
+
+    initial begin
+        clk = 0;
+        rst_n = 0;
+        start = 0;
+        length = 8'd4;
+
+        arready = 0;
+        rvalid  = 0;
+        rdata   = 32'h0;
+        awready = 0;
+        wready  = 0;
+        bvalid  = 0;
+
+        repeat (3) @(posedge clk);
+        rst_n = 1;
+
+        @(posedge clk);
+        start = 1;
+        @(posedge clk);
+        start = 0;
+
+        for (int i = 0; i < 4; i++) begin
+            wait (arvalid == 1);
+            random_delay();
+            arready = 1;
+            @(posedge clk);
+            arready = 0;
+
+            wait (rready == 1);
+            random_delay();
+            rdata  = 32'hCAFEBABE + i;
+            rvalid = 1;
+            @(posedge clk);
+            rvalid = 0;
+
+            wait (awvalid == 1 && wvalid == 1);
+            random_delay();
+            awready = 1;
+            wready  = 1;
+            @(posedge clk);
+            awready = 0;
+            wready  = 0;
+
+            wait (bready == 1);
+            random_delay();
+            bvalid = 1;
+            @(posedge clk);
+            bvalid = 0;
+        end
+
+        wait (dma_done == 1);
+        $display("DMA MULTI-TRANSFER RANDOM TEST PASS");
+        #20;
+        $finish;
+    end
+
+    always @(posedge clk) begin
+        if (arvalid && arready)
+            $display("READ ADDR PASS:  %h", araddr);
+
+        if (wvalid && wready)
+            $display("WRITE DATA PASS: %h", wdata);
+
+        if (bvalid && bready)
+            $display("WRITE RESPONSE PASS");
+    end
+
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars(0, dma_tb);
+    end
+endmodule
