@@ -78,3 +78,26 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (state == READ_DATA && rvalid)
         read_addr <= read_addr + 32'd4;
 end
+
+
+logic start;
+logic done;
+logic [31:0] data_out;
+
+dma_read u_read (
+    .clk(clk),
+    .rst_n(rst_n),
+    .start(start),
+    .base_addr(32'h1000),
+
+    .araddr(araddr),
+    .arvalid(arvalid),
+    .arready(arready),
+
+    .rdata(rdata),
+    .rvalid(rvalid),
+    .rready(rready),
+
+    .data_out(data_out),
+    .done(done)
+);
