@@ -1,5 +1,8 @@
 # AXI DMA Controller (SystemVerilog)
 
+
+🚀 A modular AXI4 DMA engine supporting multi-transfer read-to-write data movement with randomized verification.
+
 ## Overview
 Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
 
