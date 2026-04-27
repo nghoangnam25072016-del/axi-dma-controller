@@ -51,4 +51,7 @@ module dma_read (
         done     = (state == WAIT_DATA && rvalid);
     end
 
+.start(read_start),
+.done(read_done)
+
 endmodule
