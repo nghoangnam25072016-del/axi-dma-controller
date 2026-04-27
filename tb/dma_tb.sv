@@ -15,6 +15,17 @@ module dma_tb;
     logic [31:0] rdata;
     logic        rvalid;
     logic        rready;
+    logic [31:0] awaddr;
+logic        awvalid;
+logic        awready;
+
+logic [31:0] wdata;
+logic        wvalid;
+logic        wready;
+
+logic        bvalid;
+logic        bready;
+    
 
     // DUT instantiation
     dma_top dut (
@@ -26,6 +37,16 @@ module dma_tb;
         .rdata(rdata),
         .rvalid(rvalid),
         .rready(rready)
+        .awaddr(awaddr),
+.awvalid(awvalid),
+.awready(awready),
+
+.wdata(wdata),
+.wvalid(wvalid),
+.wready(wready),
+
+.bvalid(bvalid),
+.bready(bready)
     );
 
     // =============================
@@ -43,7 +64,10 @@ module dma_tb;
         arready = 0;
         rvalid  = 0;
         rdata   = 32'h0;
-
+awready = 0;
+wready  = 0;
+bvalid  = 0;
+        
         #20;
         rst_n = 1;
 
@@ -63,6 +87,23 @@ module dma_tb;
 
         #50;
         $finish;
+        
+// Write address + data ready
+#20;
+awready = 1;
+wready  = 1;
+
+#10;
+awready = 0;
+wready  = 0;
+
+// Write response
+#20;
+bvalid = 1;
+
+#10;
+bvalid = 0;
+        
     end
 
     // =============================
@@ -125,5 +166,26 @@ always @(posedge clk) begin
             $display("FAIL");
         else
             $display("PASS");
+    end
+end
+
+
+always @(posedge clk) begin
+    if (awvalid && awready) begin
+        if (awaddr == 32'h2000)
+            $display("WRITE ADDRESS PASS: awaddr=%h", awaddr);
+        else
+            $display("WRITE ADDRESS FAIL: awaddr=%h", awaddr);
+    end
+
+    if (wvalid && wready) begin
+        if (wdata == 32'hCAFEBABE)
+            $display("WRITE DATA PASS: wdata=%h", wdata);
+        else
+            $display("WRITE DATA FAIL: wdata=%h", wdata);
+    end
+
+    if (bvalid && bready) begin
+        $display("WRITE RESPONSE PASS");
     end
 end
