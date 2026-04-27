@@ -1,0 +1,232 @@
+module dma_read (
+    input  logic        clk,
+    input  logic        rst_n,
+    input  logic        start,
+    input  logic [31:0] base_addr,
+    input  logic [7:0]  index,
+
+    output logic [31:0] araddr,
+    output logic        arvalid,
+    input  logic        arready,
+
+    input  logic [31:0] rdata,
+    input  logic        rvalid,
+    output logic        rready,
+
+    output logic [31:0] data_out,
+    output logic        done
+);
+    typedef enum logic [1:0] {IDLE, SEND_ADDR, WAIT_DATA} state_t;
+    state_t state, next;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) state <= IDLE;
+        else        state <= next;
+
+    always_comb begin
+        next = state;
+        case (state)
+            IDLE:      if (start)   next = SEND_ADDR;
+            SEND_ADDR: if (arready) next = WAIT_DATA;
+            WAIT_DATA: if (rvalid)  next = IDLE;
+            default:                next = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            data_out <= 32'h0;
+        else if (state == WAIT_DATA && rvalid)
+            data_out <= rdata;
+    end
+
+    assign araddr  = base_addr + (index * 4);
+    assign arvalid = (state == SEND_ADDR);
+    assign rready  = (state == WAIT_DATA);
+    assign done    = (state == WAIT_DATA && rvalid);
+endmodule
+
+
+module dma_write (
+    input  logic        clk,
+    input  logic        rst_n,
+    input  logic        start,
+    input  logic [31:0] base_addr,
+    input  logic [7:0]  index,
+    input  logic [31:0] data_in,
+
+    output logic [31:0] awaddr,
+    output logic        awvalid,
+    input  logic        awready,
+
+    output logic [31:0] wdata,
+    output logic        wvalid,
+    input  logic        wready,
+
+    input  logic        bvalid,
+    output logic        bready,
+
+    output logic        done
+);
+    typedef enum logic [1:0] {IDLE, SEND_AW_W, WAIT_RESP} state_t;
+    state_t state, next;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) state <= IDLE;
+        else        state <= next;
+
+    always_comb begin
+        next = state;
+        case (state)
+            IDLE:      if (start)              next = SEND_AW_W;
+            SEND_AW_W: if (awready && wready)  next = WAIT_RESP;
+            WAIT_RESP: if (bvalid)             next = IDLE;
+            default:                           next = IDLE;
+        endcase
+    end
+
+    assign awaddr  = base_addr + (index * 4);
+    assign awvalid = (state == SEND_AW_W);
+    assign wdata   = data_in;
+    assign wvalid  = (state == SEND_AW_W);
+    assign bready  = (state == WAIT_RESP);
+    assign done    = (state == WAIT_RESP && bvalid);
+endmodule
+
+
+module dma_ctrl (
+    input  logic       clk,
+    input  logic       rst_n,
+    input  logic       start,
+    input  logic [7:0] length,
+
+    output logic       read_start,
+    input  logic       read_done,
+
+    output logic       write_start,
+    input  logic       write_done,
+
+    output logic [7:0] index,
+    output logic       busy,
+    output logic       done
+);
+    typedef enum logic [1:0] {IDLE, READ, WRITE, DONE} state_t;
+    state_t state, next;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) state <= IDLE;
+        else        state <= next;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            index <= 8'd0;
+        else if (state == IDLE && start)
+            index <= 8'd0;
+        else if (state == WRITE && write_done)
+            index <= index + 8'd1;
+    end
+
+    always_comb begin
+        next = state;
+        case (state)
+            IDLE:  if (start && length != 0) next = READ;
+            READ:  if (read_done)            next = WRITE;
+            WRITE: if (write_done) begin
+                       if (index == length - 1) next = DONE;
+                       else                     next = READ;
+                   end
+            DONE:                              next = IDLE;
+            default:                           next = IDLE;
+        endcase
+    end
+
+    assign read_start  = (state == READ);
+    assign write_start = (state == WRITE);
+    assign busy        = (state != IDLE);
+    assign done        = (state == DONE);
+endmodule
+
+
+module dma_top (
+    input  logic        clk,
+    input  logic        rst_n,
+    input  logic        start,
+    input  logic [7:0]  length,
+
+    output logic        busy,
+    output logic        dma_done,
+
+    output logic [31:0] araddr,
+    output logic        arvalid,
+    input  logic        arready,
+
+    input  logic [31:0] rdata,
+    input  logic        rvalid,
+    output logic        rready,
+
+    output logic [31:0] awaddr,
+    output logic        awvalid,
+    input  logic        awready,
+
+    output logic [31:0] wdata,
+    output logic        wvalid,
+    input  logic        wready,
+
+    input  logic        bvalid,
+    output logic        bready
+);
+    logic        read_start;
+    logic        read_done;
+    logic        write_start;
+    logic        write_done;
+    logic [7:0]  index;
+    logic [31:0] data_out;
+
+    dma_ctrl u_ctrl (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(start),
+        .length(length),
+        .read_start(read_start),
+        .read_done(read_done),
+        .write_start(write_start),
+        .write_done(write_done),
+        .index(index),
+        .busy(busy),
+        .done(dma_done)
+    );
+
+    dma_read u_read (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(read_start),
+        .base_addr(32'h1000),
+        .index(index),
+        .araddr(araddr),
+        .arvalid(arvalid),
+        .arready(arready),
+        .rdata(rdata),
+        .rvalid(rvalid),
+        .rready(rready),
+        .data_out(data_out),
+        .done(read_done)
+    );
+
+    dma_write u_write (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(write_start),
+        .base_addr(32'h2000),
+        .index(index),
+        .data_in(data_out),
+        .awaddr(awaddr),
+        .awvalid(awvalid),
+        .awready(awready),
+        .wdata(wdata),
+        .wvalid(wvalid),
+        .wready(wready),
+        .bvalid(bvalid),
+        .bready(bready),
+        .done(write_done)
+    );
+endmodule
