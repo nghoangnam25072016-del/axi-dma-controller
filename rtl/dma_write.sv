@@ -67,4 +67,7 @@ module dma_write (
         done    = (state == WAIT_RESP && bvalid);
     end
 
+    .start(write_start),
+.done(write_done)
+
 endmodule
