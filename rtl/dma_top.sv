@@ -2,8 +2,10 @@ module dma_top (
     input  logic clk,
     input  logic rst_n,
     input logic start,
+    input logic [7:0] length,
 output logic busy,
 output logic dma_done
+   
 
     // AXI Read Address Channel
     output logic [31:0] araddr,
