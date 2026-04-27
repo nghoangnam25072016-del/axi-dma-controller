@@ -1,21 +1,23 @@
-# AXI DMA Controller
+# AXI DMA Controller (SystemVerilog)
 
 ## Overview
-Basic AXI DMA read channel implemented in SystemVerilog.
+Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
+
+## Architecture
+![Architecture](docs/architecture.png)
 
 ## Features
-- AXI read address + data channel
-- FSM-based control
+- AXI4 Read & Write Channels
+- FSM-based Control (dma_ctrl)
+- Multi-transfer support (length parameter)
 - Address auto-increment
+- Modular design (read/write/control separation)
 
-## Simulation
-- Testbench includes AXI handshake simulation
-- Basic PASS/FAIL checking
+## Verification
+- Self-checking testbench
+- Randomized AXI handshake timing
+- Multi-transaction support
 
-## Next Steps
-- Add write channel
-- Improve verification
-
-Supports multi-word DMA transfers using a programmable length counter
-- Randomized AXI ready/valid timing in testbench
-- Multi-transfer end-to-end verification
+## Results
+- Successfully simulated end-to-end DMA transfers
+- PASS/FAIL verification messages
