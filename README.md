@@ -3,7 +3,7 @@
 ## Overview
 Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
 
-![Architecture](docs/architecture.png)
+[Architecture](docs/architecture.png)
 
 ## Features
 - AXI4 Read & Write Channels
