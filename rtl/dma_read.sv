@@ -2,6 +2,7 @@
 module dma_read (
     input  logic clk,
     input  logic rst_n,
+    input logic [7:0] index
 
     // control
     input  logic        start,
@@ -45,8 +46,7 @@ module dma_read (
     always_comb begin
         arvalid  = (state == SEND_ADDR);
         rready   = (state == WAIT_DATA);
-        araddr   = base_addr;
-
+        araddr = base_addr + (index * 4);
         data_out = rdata;
         done     = (state == WAIT_DATA && rvalid);
     end
