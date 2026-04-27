@@ -45,12 +45,26 @@ module dma_ctrl (
                 if (read_done)
                     next = WRITE;
 
-            WRITE:
-                if (write_done)
-                    next = DONE;
+           WRITE:
+    if (write_done) begin
+        if (count == length - 1)
+            next = DONE;
+        else
+            next = READ;
+    end
 
             DONE:
                 next = IDLE;
+            always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        count <= 0;
+    else if (state == IDLE && start)
+        count <= 0;
+    else if (state == WRITE && write_done)
+        count <= count + 1;
+end
+
+            
         endcase
     end
 
