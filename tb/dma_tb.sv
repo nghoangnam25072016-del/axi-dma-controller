@@ -25,6 +25,10 @@ logic        wready;
 
 logic        bvalid;
 logic        bready;
+
+    logic start;
+logic busy;
+logic dma_done;
     
 
     // DUT instantiation
@@ -46,7 +50,10 @@ logic        bready;
 .wready(wready),
 
 .bvalid(bvalid),
-.bready(bready)
+        .bready(bready),
+        .start(start),
+.busy(busy),
+        .dma_done(dma_done)
     );
 
     // =============================
@@ -103,6 +110,16 @@ bvalid = 1;
 
 #10;
 bvalid = 0;
+        start = 0;
+
+#20;
+rst_n = 1;
+
+#10;
+start = 1;
+
+#10;
+start = 0;
         
     end
 
@@ -188,4 +205,9 @@ always @(posedge clk) begin
     if (bvalid && bready) begin
         $display("WRITE RESPONSE PASS");
     end
+end
+
+always @(posedge clk) begin
+    if (dma_done)
+        $display("DMA END-TO-END PASS");
 end
