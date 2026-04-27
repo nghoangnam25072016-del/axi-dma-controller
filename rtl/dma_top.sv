@@ -62,3 +62,19 @@ module dma_top (
     end
 
 endmodule
+
+
+// thêm vào phần always_comb / always_ff phù hợp
+always_comb begin
+    arvalid = (state == SEND_ADDR);
+    rready  = (state == READ_DATA);
+    araddr  = read_addr;
+end
+
+// tăng địa chỉ mỗi lần đọc xong
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        read_addr <= 32'h0;
+    else if (state == READ_DATA && rvalid)
+        read_addr <= read_addr + 32'd4;
+end
