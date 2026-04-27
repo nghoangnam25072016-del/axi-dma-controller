@@ -29,7 +29,8 @@ logic        bready;
     logic start;
 logic busy;
 logic dma_done;
-    
+
+    length = 4;
 
     // DUT instantiation
     dma_top dut (
