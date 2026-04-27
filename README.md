@@ -21,3 +21,6 @@ Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
 ## Results
 - Successfully simulated end-to-end DMA transfers
 - PASS/FAIL verification messages
+
+## Waveform
+![Waveform](sim/waveform.png)
