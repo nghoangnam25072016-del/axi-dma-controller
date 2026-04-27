@@ -15,3 +15,5 @@ Basic AXI DMA read channel implemented in SystemVerilog.
 ## Next Steps
 - Add write channel
 - Improve verification
+
+Supports multi-word DMA transfers using a programmable length counter
