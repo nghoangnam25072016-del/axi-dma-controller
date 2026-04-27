@@ -1,8 +1,17 @@
+# AXI DMA Controller
+
+## Overview
+Basic AXI DMA read channel implemented in SystemVerilog.
+
 ## Features
-- AXI read channel support
-- Basic FSM control
+- AXI read address + data channel
+- FSM-based control
+- Address auto-increment
 
 ## Simulation
-- Testbench simulates AXI handshake
+- Testbench includes AXI handshake simulation
+- Basic PASS/FAIL checking
 
-Add basic testbench for AXI DMA controller
+## Next Steps
+- Add write channel
+- Improve verification
