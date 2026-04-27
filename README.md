@@ -3,7 +3,6 @@
 ## Overview
 Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
 
-## Architecture
 ![Architecture](docs/architecture.png)
 
 ## Features
