@@ -74,3 +74,25 @@ module dma_tb;
     end
 
 endmodule
+
+
+logic test_pass;
+
+initial begin
+    test_pass = 1;
+
+    // sau khi rvalid
+    #100;
+    if (rdata !== 32'hDEADBEEF) begin
+        $display("TEST FAIL: Wrong data");
+        test_pass = 0;
+    end
+
+    #10;
+    if (test_pass)
+        $display("TEST PASS");
+    else
+        $display("TEST FAILED");
+
+    $finish;
+end
