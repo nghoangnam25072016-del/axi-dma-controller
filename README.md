@@ -4,3 +4,5 @@
 
 ## Simulation
 - Testbench simulates AXI handshake
+
+Add basic testbench for AXI DMA controller
