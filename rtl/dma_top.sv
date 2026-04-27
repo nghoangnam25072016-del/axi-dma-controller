@@ -13,6 +13,45 @@ module dma_top (
     output logic        rready
 );
 
+// AXI Write Address Channel
+output logic [31:0] awaddr,
+output logic        awvalid,
+input  logic        awready,
+
+// AXI Write Data Channel
+output logic [31:0] wdata,
+output logic        wvalid,
+input  logic        wready,
+
+// AXI Write Response Channel
+input  logic        bvalid,
+output logic        bready
+
+logic write_start;
+logic write_done;
+
+dma_write u_write (
+    .clk(clk),
+    .rst_n(rst_n),
+
+    .start(write_start),
+    .base_addr(32'h2000),
+    .data_in(data_out),
+
+    .awaddr(awaddr),
+    .awvalid(awvalid),
+    .awready(awready),
+
+    .wdata(wdata),
+    .wvalid(wvalid),
+    .wready(wready),
+
+    .bvalid(bvalid),
+    .bready(bready),
+
+    .done(write_done)
+);
+    
     // =============================
     // Internal signals
     // =============================
