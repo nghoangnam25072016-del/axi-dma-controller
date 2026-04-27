@@ -1,6 +1,7 @@
 module dma_write (
     input  logic        clk,
     input  logic        rst_n,
+    input logic [7:0] index,
 
     input  logic        start,
     input  logic [31:0] base_addr,
@@ -57,7 +58,7 @@ module dma_write (
     end
 
     always_comb begin
-        awaddr  = base_addr;
+        awaddr = base_addr + (index * 4);
         awvalid = (state == SEND_AW_W);
 
         wdata   = data_in;
