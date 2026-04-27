@@ -117,3 +117,13 @@ initial begin
 
     #50 $finish;
 end
+
+
+always @(posedge clk) begin
+    if (rvalid) begin
+        if (rdata !== 32'hCAFEBABE)
+            $display("FAIL");
+        else
+            $display("PASS");
+    end
+end
