@@ -24,5 +24,14 @@ Designed a multi-transfer AXI DMA engine supporting read-to-write data movement.
 - Successfully simulated end-to-end DMA transfers
 - PASS/FAIL verification messages
 
+
 ## Waveform
+Multi-transfer AXI DMA operation showing correct address increment and data movement.
 ![Waveform](sim/waveform.png)
+
+
+## Key Highlights
+- Designed end-to-end AXI DMA data path (read → buffer → write)
+- Implemented FSM-based control with multi-transfer support
+- Verified using randomized AXI handshake timing
+- Achieved correct data transfer across multiple transactions
