@@ -1,6 +1,9 @@
 module dma_top (
     input  logic clk,
     input  logic rst_n,
+    input logic start,
+output logic busy,
+output logic dma_done
 
     // AXI Read Address Channel
     output logic [31:0] araddr,
@@ -57,7 +60,11 @@ dma_write u_write (
     // =============================
     logic [31:0] read_addr;
     logic        read_en;
-
+logic read_start;
+logic read_done;
+logic write_start;
+logic write_done;
+    
     // =============================
     // Simple FSM
     // =============================
@@ -137,6 +144,26 @@ dma_read u_read (
     .rvalid(rvalid),
     .rready(rready),
 
+
+    
+
     .data_out(data_out),
     .done(done)
+);
+
+
+dma_ctrl u_ctrl (
+    .clk(clk),
+    .rst_n(rst_n),
+
+    .start(start),
+
+    .read_start(read_start),
+    .read_done(read_done),
+
+    .write_start(write_start),
+    .write_done(write_done),
+
+    .busy(busy),
+    .done(dma_done)
 );
