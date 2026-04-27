@@ -96,3 +96,24 @@ initial begin
 
     $finish;
 end
+
+
+initial begin
+    clk = 0;
+    rst_n = 0;
+    #20;
+    rst_n = 1;
+
+    // ready address
+    #10 arready = 1;
+    #10 arready = 0;
+
+    // data response
+    #20;
+    rvalid = 1;
+    rdata  = 32'hCAFEBABE;
+
+    #10 rvalid = 0;
+
+    #50 $finish;
+end
