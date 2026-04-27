@@ -1,2 +1,6 @@
-# axi-dma-controller
-own project
+## Features
+- AXI read channel support
+- Basic FSM control
+
+## Simulation
+- Testbench simulates AXI handshake
