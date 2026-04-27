@@ -2,6 +2,9 @@ module dma_ctrl (
     input  logic clk,
     input  logic rst_n,
 
+    input  logic [7:0] length,
+    logic [7:0] count;,
+
     input  logic start,
 
     output logic read_start,
