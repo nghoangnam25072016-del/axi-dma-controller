@@ -212,3 +212,47 @@ always @(posedge clk) begin
     if (dma_done)
         $display("DMA END-TO-END PASS");
 end
+
+task automatic random_delay();
+    repeat ($urandom_range(1, 5)) @(posedge clk);
+endtask
+
+for (int i = 0; i < 4; i++) begin
+    // Read address ready
+    random_delay();
+    arready = 1;
+    @(posedge clk);
+    arready = 0;
+
+    // Read data valid
+    random_delay();
+    rdata  = 32'hCAFEBABE + i;
+    rvalid = 1;
+    @(posedge clk);
+    rvalid = 0;
+
+    // Write address/data ready
+    random_delay();
+    awready = 1;
+    wready  = 1;
+    @(posedge clk);
+    awready = 0;
+    wready  = 0;
+
+    // Write response
+    random_delay();
+    bvalid = 1;
+    @(posedge clk);
+    bvalid = 0;
+end
+
+always @(posedge clk) begin
+    if (arvalid && arready)
+        $display("READ ADDR: %h", araddr);
+
+    if (wvalid && wready)
+        $display("WRITE DATA: %h", wdata);
+
+    if (dma_done)
+        $display("DMA MULTI-TRANSFER RANDOM TEST PASS");
+end
